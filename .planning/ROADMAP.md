@@ -50,7 +50,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md -- Packer HCL config, variables, common symlink, cloud-init, SSH hardening, and context config scripts
-- [ ] 02-02-PLAN.md -- gen_context script, metadata.yaml with VM template defaults, and Makefile.config build target
+- [x] 02-02-PLAN.md -- gen_context script, metadata.yaml with VM template defaults, and Makefile.config build target
 
 ### Phase 3: Image Build and Validation
 **Goal**: A tested, bootable qcow2 image exists that auto-configures NemoClaw at first boot, supports GPU passthrough, and provides SSH/VNC access
