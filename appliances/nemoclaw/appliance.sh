@@ -110,14 +110,20 @@ DOCKER_EOF
     # 6. Install NVIDIA Container Toolkit (per STACK.md)
     # ---------------------------------------------------------------------- #
     msg info "Installing NVIDIA Container Toolkit..."
-    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey \
-        | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
 
+    # Remove any pre-existing nvidia repo entries (nvidia-driver may add unsigned ones)
+    rm -f /etc/apt/sources.list.d/nvidia*.list 2>/dev/null || true
+
+    # Import GPG key (force overwrite if stale)
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey \
+        | gpg --batch --yes --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+
+    # Add repo with signed-by keyring
     curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list \
         | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' \
         > /etc/apt/sources.list.d/nvidia-container-toolkit.list
 
-    apt-get update
+    apt-get update -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/nvidia-container-toolkit.list -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
     apt-get install -y nvidia-container-toolkit
     nvidia-ctk runtime configure --runtime=docker
     systemctl restart docker
