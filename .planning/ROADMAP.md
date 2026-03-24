@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Script skeleton, ONE_SERVICE_PARAMS, and service_install() with all dependency installation
+- [x] 01-01-PLAN.md -- Script skeleton, ONE_SERVICE_PARAMS, and service_install() with all dependency installation
 - [ ] 01-02-PLAN.md -- GPU detection, helper functions, and service_configure() with CONTEXT variable handling
 - [ ] 01-03-PLAN.md -- service_bootstrap() with NemoClaw onboard, sandbox creation, and health validation
 

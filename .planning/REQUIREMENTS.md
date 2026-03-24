@@ -21,11 +21,11 @@ Requirements for initial marketplace PR submission. Each maps to roadmap phases.
 
 ### Appliance Lifecycle
 
-- [ ] **LIFE-01**: appliance.sh implements service_install() for package installation during Packer build
+- [x] **LIFE-01**: appliance.sh implements service_install() for package installation during Packer build
 - [ ] **LIFE-02**: appliance.sh implements service_configure() for first-boot configuration from CONTEXT variables
 - [ ] **LIFE-03**: appliance.sh implements service_bootstrap() for NemoClaw sandbox creation and startup
-- [ ] **LIFE-04**: ONE_SERVICE_PARAMS array defines all contextualization parameters with types and descriptions
-- [ ] **LIFE-05**: ONE_SERVICE_RECONFIGURABLE=true enables recontext without redeploy
+- [x] **LIFE-04**: ONE_SERVICE_PARAMS array defines all contextualization parameters with types and descriptions
+- [x] **LIFE-05**: ONE_SERVICE_RECONFIGURABLE=true enables recontext without redeploy
 
 ### GPU Support
 
@@ -36,9 +36,9 @@ Requirements for initial marketplace PR submission. Each maps to roadmap phases.
 
 ### Contextualization
 
-- [ ] **CTX-01**: ONEAPP_NEMOCLAW_API_KEY (mandatory password) injects NVIDIA API key for inference
-- [ ] **CTX-02**: ONEAPP_NEMOCLAW_MODEL (optional list) selects Nemotron model, default nemotron-3-super-120b
-- [ ] **CTX-03**: ONEAPP_NEMOCLAW_SANDBOX_NAME (optional text) sets sandbox instance name, default "nemoclaw"
+- [x] **CTX-01**: ONEAPP_NEMOCLAW_API_KEY (mandatory password) injects NVIDIA API key for inference
+- [x] **CTX-02**: ONEAPP_NEMOCLAW_MODEL (optional list) selects Nemotron model, default nemotron-3-super-120b
+- [x] **CTX-03**: ONEAPP_NEMOCLAW_SANDBOX_NAME (optional text) sets sandbox instance name, default "nemoclaw"
 - [ ] **CTX-04**: SSH key-based access via $USER[SSH_PUBLIC_KEY] contextualization
 - [ ] **CTX-05**: Network auto-configuration via standard OpenNebula contextualization
 
@@ -115,18 +115,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BUILD-07 | Phase 2 | Pending |
 | BUILD-08 | Phase 2 | Pending |
 | BUILD-09 | Phase 3 | Pending |
-| LIFE-01 | Phase 1 | Pending |
+| LIFE-01 | Phase 1 | Complete |
 | LIFE-02 | Phase 1 | Pending |
 | LIFE-03 | Phase 1 | Pending |
-| LIFE-04 | Phase 1 | Pending |
-| LIFE-05 | Phase 1 | Pending |
+| LIFE-04 | Phase 1 | Complete |
+| LIFE-05 | Phase 1 | Complete |
 | GPU-01 | Phase 3 | Pending |
 | GPU-02 | Phase 1 | Pending |
 | GPU-03 | Phase 3 | Pending |
 | GPU-04 | Phase 1 | Pending |
-| CTX-01 | Phase 1 | Pending |
-| CTX-02 | Phase 1 | Pending |
-| CTX-03 | Phase 1 | Pending |
+| CTX-01 | Phase 1 | Complete |
+| CTX-02 | Phase 1 | Complete |
+| CTX-03 | Phase 1 | Complete |
 | CTX-04 | Phase 1 | Pending |
 | CTX-05 | Phase 1 | Pending |
 | HLTH-01 | Phase 3 | Pending |
