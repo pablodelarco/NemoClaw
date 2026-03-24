@@ -62,11 +62,11 @@ Plans:
   3. User can SSH into the VM with key-based authentication and interact with the NemoClaw CLI
   4. VNC console access works via OpenNebula Sunstone
   5. When a GPU is passed through, nvidia-smi validates driver/device availability inside the VM
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md -- Build host validation, repository setup, and Packer build execution to produce qcow2 image
+- [ ] 03-02-PLAN.md -- VM deployment to OpenNebula with GPU passthrough, SSH/VNC/CLI access validation, and health check verification
 
 ### Phase 4: Marketplace Packaging and PR Submission
 **Goal**: A complete, PR-ready package for the OpenNebula marketplace-community repository that passes validation
@@ -92,5 +92,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Appliance Lifecycle Script | 0/3 | Planning complete | - |
 | 2. Packer Build Pipeline | 0/2 | Planning complete | - |
-| 3. Image Build and Validation | 0/0 | Not started | - |
+| 3. Image Build and Validation | 0/2 | Planning complete | - |
 | 4. Marketplace Packaging and PR Submission | 0/0 | Not started | - |
