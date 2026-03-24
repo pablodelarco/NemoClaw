@@ -113,17 +113,22 @@ DOCKER_EOF
 
     # Remove any pre-existing nvidia repo entries (nvidia-driver may add unsigned ones)
     rm -f /etc/apt/sources.list.d/nvidia*.list 2>/dev/null || true
+    rm -f /etc/apt/sources.list.d/nvidia*.sources 2>/dev/null || true
 
-    # Import GPG key (force overwrite if stale)
+    # Import GPG key using apt-key compatible method for reliability
     curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey \
         | gpg --batch --yes --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+    chmod 644 /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
 
-    # Add repo with signed-by keyring
-    curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list \
-        | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' \
-        > /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    # Add repo in DEB822 format (Ubuntu 24.04 native)
+    cat > /etc/apt/sources.list.d/nvidia-container-toolkit.sources <<'NCTK_EOF'
+Types: deb
+URIs: https://nvidia.github.io/libnvidia-container/stable/deb/$(ARCH)
+Suites: /
+Signed-By: /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+NCTK_EOF
 
-    apt-get update -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/nvidia-container-toolkit.list -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+    apt-get update
     apt-get install -y nvidia-container-toolkit
     nvidia-ctk runtime configure --runtime=docker
     systemctl restart docker
