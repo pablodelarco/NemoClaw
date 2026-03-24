@@ -29,11 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. service_configure() reads CONTEXT variables and writes NemoClaw configuration (API key to restricted file, model selection, sandbox name)
   4. service_bootstrap() creates and starts the NemoClaw sandbox, then runs health validation
   5. GPU detection logic differentiates GPU-present (proceed with nvidia-smi validation) from GPU-absent (log warning, continue with remote-only inference)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md -- Script skeleton, ONE_SERVICE_PARAMS, and service_install() with all dependency installation
+- [ ] 01-02-PLAN.md -- GPU detection, helper functions, and service_configure() with CONTEXT variable handling
+- [ ] 01-03-PLAN.md -- service_bootstrap() with NemoClaw onboard, sandbox creation, and health validation
 
 ### Phase 2: Packer Build Pipeline
 **Goal**: The Packer build system is complete -- all HCL configs, provisioner scripts, and build metadata produce a qcow2 image with every dependency baked in
@@ -89,7 +90,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Appliance Lifecycle Script | 0/0 | Not started | - |
+| 1. Appliance Lifecycle Script | 0/3 | Planning complete | - |
 | 2. Packer Build Pipeline | 0/0 | Not started | - |
 | 3. Image Build and Validation | 0/0 | Not started | - |
 | 4. Marketplace Packaging and PR Submission | 0/0 | Not started | - |
