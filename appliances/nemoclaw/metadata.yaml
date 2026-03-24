@@ -1,0 +1,71 @@
+---
+# NemoClaw Appliance Build Metadata
+# Follows one-apps/marketplace-community convention (Prowler pattern)
+
+name: NemoClaw
+version: "0.1.0"
+publisher: community
+description: >-
+  NVIDIA NemoClaw AI agent security stack. Provides secure sandboxed
+  execution of AI agents with GPU passthrough support, NVIDIA inference
+  routing, and Landlock/seccomp isolation. Alpha software.
+short_description: "NemoClaw AI agent security sandbox with GPU passthrough"
+tags:
+  - nvidia
+  - nemoclaw
+  - ai
+  - gpu
+  - security
+  - sandbox
+  - docker
+  - openshell
+
+# Build configuration
+build:
+  os:
+    id: Ubuntu
+    release: "24.04"
+    arch: x86_64
+  base_image: ubuntu2404
+
+# Context parameters (must match ONE_SERVICE_PARAMS in appliance.sh)
+context:
+  params:
+    ONEAPP_NEMOCLAW_API_KEY:
+      type: password
+      mandatory: true
+      description: "NVIDIA API key from build.nvidia.com for inference"
+    ONEAPP_NEMOCLAW_MODEL:
+      type: text
+      mandatory: false
+      default: "nemotron-3-super-120b"
+      description: "Nemotron model for inference"
+    ONEAPP_NEMOCLAW_SANDBOX_NAME:
+      type: text
+      mandatory: false
+      default: "nemoclaw"
+      description: "Sandbox instance name (lowercase alphanumeric and hyphens)"
+
+# VM template defaults (per D-07)
+opennebula_template:
+  context:
+    network: 'YES'
+    ssh_public_key: '$USER[SSH_PUBLIC_KEY]'
+  cpu: '2'
+  vcpu: '2'
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  memory: '8192'
+  hypervisor: kvm
+  nic_default:
+    model: virtio
+  os:
+    arch: x86_64
+  cpu_model:
+    model: host-passthrough
+  user_inputs:
+    ONEAPP_NEMOCLAW_API_KEY: 'M|password|NVIDIA API key (from build.nvidia.com)||'
+    ONEAPP_NEMOCLAW_MODEL: 'O|text|Inference model|nemotron-3-super-120b|nemotron-3-super-120b'
+    ONEAPP_NEMOCLAW_SANDBOX_NAME: 'O|text|Sandbox name|nemoclaw|nemoclaw'
+  inputs_order: 'ONEAPP_NEMOCLAW_API_KEY,ONEAPP_NEMOCLAW_MODEL,ONEAPP_NEMOCLAW_SANDBOX_NAME'
