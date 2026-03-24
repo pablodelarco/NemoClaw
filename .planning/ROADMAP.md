@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [x] 01-01-PLAN.md -- Script skeleton, ONE_SERVICE_PARAMS, and service_install() with all dependency installation
 - [x] 01-02-PLAN.md -- GPU detection, helper functions, and service_configure() with CONTEXT variable handling
-- [ ] 01-03-PLAN.md -- service_bootstrap() with NemoClaw onboard, sandbox creation, and health validation
+- [x] 01-03-PLAN.md -- service_bootstrap() with NemoClaw onboard, sandbox creation, and health validation
 
 ### Phase 2: Packer Build Pipeline
 **Goal**: The Packer build system is complete -- all HCL configs, provisioner scripts, and build metadata produce a qcow2 image with every dependency baked in

@@ -23,7 +23,7 @@ Requirements for initial marketplace PR submission. Each maps to roadmap phases.
 
 - [x] **LIFE-01**: appliance.sh implements service_install() for package installation during Packer build
 - [x] **LIFE-02**: appliance.sh implements service_configure() for first-boot configuration from CONTEXT variables
-- [ ] **LIFE-03**: appliance.sh implements service_bootstrap() for NemoClaw sandbox creation and startup
+- [x] **LIFE-03**: appliance.sh implements service_bootstrap() for NemoClaw sandbox creation and startup
 - [x] **LIFE-04**: ONE_SERVICE_PARAMS array defines all contextualization parameters with types and descriptions
 - [x] **LIFE-05**: ONE_SERVICE_RECONFIGURABLE=true enables recontext without redeploy
 
@@ -117,7 +117,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BUILD-09 | Phase 3 | Pending |
 | LIFE-01 | Phase 1 | Complete |
 | LIFE-02 | Phase 1 | Complete |
-| LIFE-03 | Phase 1 | Pending |
+| LIFE-03 | Phase 1 | Complete |
 | LIFE-04 | Phase 1 | Complete |
 | LIFE-05 | Phase 1 | Complete |
 | GPU-01 | Phase 3 | Pending |
