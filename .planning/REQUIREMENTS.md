@@ -106,52 +106,52 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUILD-01 | Pending | Pending |
-| BUILD-02 | Pending | Pending |
-| BUILD-03 | Pending | Pending |
-| BUILD-04 | Pending | Pending |
-| BUILD-05 | Pending | Pending |
-| BUILD-06 | Pending | Pending |
-| BUILD-07 | Pending | Pending |
-| BUILD-08 | Pending | Pending |
-| BUILD-09 | Pending | Pending |
-| LIFE-01 | Pending | Pending |
-| LIFE-02 | Pending | Pending |
-| LIFE-03 | Pending | Pending |
-| LIFE-04 | Pending | Pending |
-| LIFE-05 | Pending | Pending |
-| GPU-01 | Pending | Pending |
-| GPU-02 | Pending | Pending |
-| GPU-03 | Pending | Pending |
-| GPU-04 | Pending | Pending |
-| CTX-01 | Pending | Pending |
-| CTX-02 | Pending | Pending |
-| CTX-03 | Pending | Pending |
-| CTX-04 | Pending | Pending |
-| CTX-05 | Pending | Pending |
-| HLTH-01 | Pending | Pending |
-| HLTH-02 | Pending | Pending |
-| HLTH-03 | Pending | Pending |
-| MKT-01 | Pending | Pending |
-| MKT-02 | Pending | Pending |
-| MKT-03 | Pending | Pending |
-| MKT-04 | Pending | Pending |
-| MKT-05 | Pending | Pending |
-| MKT-06 | Pending | Pending |
-| MKT-07 | Pending | Pending |
-| MKT-08 | Pending | Pending |
-| MKT-09 | Pending | Pending |
-| MKT-10 | Pending | Pending |
-| MKT-11 | Pending | Pending |
-| ACC-01 | Pending | Pending |
-| ACC-02 | Pending | Pending |
-| ACC-03 | Pending | Pending |
+| BUILD-01 | Phase 2 | Pending |
+| BUILD-02 | Phase 2 | Pending |
+| BUILD-03 | Phase 2 | Pending |
+| BUILD-04 | Phase 2 | Pending |
+| BUILD-05 | Phase 2 | Pending |
+| BUILD-06 | Phase 2 | Pending |
+| BUILD-07 | Phase 2 | Pending |
+| BUILD-08 | Phase 2 | Pending |
+| BUILD-09 | Phase 3 | Pending |
+| LIFE-01 | Phase 1 | Pending |
+| LIFE-02 | Phase 1 | Pending |
+| LIFE-03 | Phase 1 | Pending |
+| LIFE-04 | Phase 1 | Pending |
+| LIFE-05 | Phase 1 | Pending |
+| GPU-01 | Phase 3 | Pending |
+| GPU-02 | Phase 1 | Pending |
+| GPU-03 | Phase 3 | Pending |
+| GPU-04 | Phase 1 | Pending |
+| CTX-01 | Phase 1 | Pending |
+| CTX-02 | Phase 1 | Pending |
+| CTX-03 | Phase 1 | Pending |
+| CTX-04 | Phase 1 | Pending |
+| CTX-05 | Phase 1 | Pending |
+| HLTH-01 | Phase 3 | Pending |
+| HLTH-02 | Phase 3 | Pending |
+| HLTH-03 | Phase 3 | Pending |
+| MKT-01 | Phase 4 | Pending |
+| MKT-02 | Phase 4 | Pending |
+| MKT-03 | Phase 4 | Pending |
+| MKT-04 | Phase 2 | Pending |
+| MKT-05 | Phase 4 | Pending |
+| MKT-06 | Phase 4 | Pending |
+| MKT-07 | Phase 4 | Pending |
+| MKT-08 | Phase 2 | Pending |
+| MKT-09 | Phase 4 | Pending |
+| MKT-10 | Phase 2 | Pending |
+| MKT-11 | Phase 4 | Pending |
+| ACC-01 | Phase 3 | Pending |
+| ACC-02 | Phase 3 | Pending |
+| ACC-03 | Phase 3 | Pending |
 
 **Coverage:**
-- v1 requirements: 36 total
-- Mapped to phases: 0
-- Unmapped: 36
+- v1 requirements: 40 total
+- Mapped to phases: 40
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-24*
-*Last updated: 2026-03-24 after initial definition*
+*Last updated: 2026-03-24 after roadmap creation*
