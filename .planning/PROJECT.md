@@ -12,12 +12,13 @@ One-click deployment of NemoClaw on OpenNebula with GPU passthrough and secure d
 
 ### Validated
 
-(None yet - ship to validate)
+- Appliance script implements service_install, service_configure, service_bootstrap lifecycle - Phase 1
+- Contextualization parameters expose: NVIDIA API key, model selection, sandbox name - Phase 1
+- GPU detection with graceful fallback to remote-only inference - Phase 1
 
 ### Active
 
 - [ ] Packer build produces a bootable qcow2 image with NemoClaw pre-installed on Ubuntu 22.04
-- [ ] Appliance script implements service_install, service_configure, service_bootstrap lifecycle
 - [ ] GPU passthrough configuration works with NVIDIA GPUs via OpenNebula PCI device assignment
 - [ ] Docker and NVIDIA Container Toolkit pre-installed and configured
 - [ ] NemoClaw sandbox runtime (OpenShell) starts on boot via contextualization
@@ -81,4 +82,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-24 after initialization*
+*Last updated: 2026-03-24 after Phase 1 completion*
