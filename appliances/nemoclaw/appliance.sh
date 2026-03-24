@@ -371,13 +371,235 @@ CONF_EOF
     return 0
 }
 
+check_nemoclaw_health()
+{
+    local _sandbox_name="${1:-nemoclaw}"
+    local _max_retries=30
+    local _retry_interval=10
+    local _attempt=0
+
+    msg info "Validating NemoClaw sandbox health (timeout: $((${_max_retries} * ${_retry_interval}))s)..."
+
+    while [ ${_attempt} -lt ${_max_retries} ]; do
+        _attempt=$((_attempt + 1))
+
+        # Check Docker is running
+        if ! docker info &>/dev/null; then
+            msg warning "Docker not responding (attempt ${_attempt}/${_max_retries})"
+            sleep ${_retry_interval}
+            continue
+        fi
+
+        # Check NemoClaw sandbox status
+        if command -v nemoclaw &>/dev/null; then
+            local _status
+            _status=$(nemoclaw "${_sandbox_name}" status 2>/dev/null || echo "unknown")
+
+            if echo "${_status}" | grep -qi 'running\|healthy\|ready'; then
+                msg info "NemoClaw sandbox '${_sandbox_name}' is healthy"
+                return 0
+            fi
+
+            msg info "Sandbox status: ${_status} (attempt ${_attempt}/${_max_retries})"
+        else
+            msg warning "nemoclaw CLI not found (attempt ${_attempt}/${_max_retries})"
+        fi
+
+        sleep ${_retry_interval}
+    done
+
+    msg error "NemoClaw sandbox '${_sandbox_name}' failed health check after ${_max_retries} attempts"
+    return 1
+}
+
+# ========================== service_bootstrap() ============================= #
+# Runs at first boot after service_configure(). Creates the NemoClaw sandbox,
+# runs NemoClaw onboard non-interactively, validates health, and updates MOTD.
+# per LIFE-03, D-03, D-07, D-08
+
 service_bootstrap()
 {
-    # Implemented in Plan 03
-    :
+    msg info "Bootstrapping NemoClaw appliance..."
+
+    # --- Load configuration from service_configure ---
+    if [ -f "${ONE_SERVICE_SETUP_DIR}/nemoclaw.conf" ]; then
+        . "${ONE_SERVICE_SETUP_DIR}/nemoclaw.conf"
+    else
+        msg error "Configuration file not found at ${ONE_SERVICE_SETUP_DIR}/nemoclaw.conf"
+        msg error "service_configure must run before service_bootstrap"
+        return 1
+    fi
+
+    local _sandbox_name="${NEMOCLAW_SANDBOX_NAME:-nemoclaw}"
+    local _model="${NEMOCLAW_MODEL:-nemotron-3-super-120b}"
+    local _api_key_file="${NEMOCLAW_API_KEY_FILE:-/etc/nemoclaw/api_key}"
+    local _gpu="${NEMOCLAW_GPU_DETECTED:-false}"
+
+    # --- Validate API key file exists ---
+    if [ ! -f "${_api_key_file}" ]; then
+        msg error "API key file not found at ${_api_key_file}"
+        msg error "service_configure should have created this file"
+        return 1
+    fi
+
+    local _api_key
+    _api_key=$(cat "${_api_key_file}")
+
+    if [ -z "${_api_key}" ]; then
+        msg error "API key file is empty at ${_api_key_file}"
+        return 1
+    fi
+
+    # --- Ensure Docker is running ---
+    if ! systemctl is-active --quiet docker; then
+        msg info "Starting Docker daemon..."
+        systemctl start docker
+        sleep 5
+    fi
+
+    # --- Run NemoClaw onboard non-interactively (per D-03) ---
+    msg info "Running NemoClaw onboard (non-interactive)..."
+    msg info "  Sandbox name: ${_sandbox_name}"
+    msg info "  Model:        ${_model}"
+    msg info "  GPU:          ${_gpu}"
+
+    # Set environment variables for NemoClaw onboard
+    # NemoClaw reads NVIDIA_API_KEY from environment for non-interactive onboard
+    export NVIDIA_API_KEY="${_api_key}"
+
+    # Run onboard with API key and model selection
+    # The onboard command sets up the inference provider and creates initial config
+    if ! nemoclaw onboard \
+        --api-key "${_api_key}" \
+        --model "${_model}" \
+        --non-interactive 2>&1 | while IFS= read -r line; do msg info "  onboard: ${line}"; done; then
+
+        # If --non-interactive flag is not supported, try alternative approach
+        msg warning "Non-interactive onboard may have failed; trying environment variable approach..."
+
+        # Alternative: NemoClaw may read from env vars directly
+        NVIDIA_API_KEY="${_api_key}" \
+        NEMOCLAW_MODEL="${_model}" \
+        nemoclaw onboard 2>&1 | while IFS= read -r line; do msg info "  onboard: ${line}"; done || {
+            msg error "NemoClaw onboard failed. Check API key validity and network connectivity."
+            msg error "You can retry manually: nemoclaw onboard"
+
+            cat > /etc/motd <<'MOTD_FAIL'
+============================================================
+  NemoClaw Appliance - BOOTSTRAP FAILED
+
+  NemoClaw onboard failed. Possible causes:
+  - Invalid NVIDIA API key
+  - Network connectivity issues
+  - NemoClaw service unavailable
+
+  To retry: nemoclaw onboard
+  To check: nemoclaw status
+============================================================
+MOTD_FAIL
+            # Clear sensitive data from environment
+            unset NVIDIA_API_KEY
+            return 1
+        }
+    fi
+
+    # Clear API key from environment after use
+    unset NVIDIA_API_KEY
+
+    # --- Create sandbox (per D-07, D-08) ---
+    msg info "Creating NemoClaw sandbox '${_sandbox_name}'..."
+
+    if ! nemoclaw create "${_sandbox_name}" 2>&1 | while IFS= read -r line; do msg info "  create: ${line}"; done; then
+        msg error "Failed to create NemoClaw sandbox '${_sandbox_name}'"
+        msg error "Retrying sandbox creation..."
+
+        # One retry with verbose output
+        if ! nemoclaw create "${_sandbox_name}" --verbose 2>&1; then
+            msg error "Sandbox creation failed after retry"
+            cat > /etc/motd <<MOTD_FAIL2
+============================================================
+  NemoClaw Appliance - BOOTSTRAP FAILED
+
+  Failed to create sandbox '${_sandbox_name}'.
+
+  To retry: nemoclaw create ${_sandbox_name}
+  To check: nemoclaw status
+============================================================
+MOTD_FAIL2
+            return 1
+        fi
+    fi
+
+    # --- Start sandbox ---
+    msg info "Starting NemoClaw sandbox '${_sandbox_name}'..."
+    nemoclaw start "${_sandbox_name}" 2>&1 | while IFS= read -r line; do msg info "  start: ${line}"; done || {
+        msg warning "Sandbox start command returned non-zero; checking status..."
+    }
+
+    # --- Run health checks ---
+    if check_nemoclaw_health "${_sandbox_name}"; then
+        msg info "NemoClaw bootstrap completed successfully"
+
+        # --- Update MOTD with success status ---
+        # Refresh GPU info in case it changed
+        detect_gpu
+
+        # Write final MOTD with success message
+        write_motd
+
+        # Append the success marker that tests look for
+        echo "" >> /etc/motd
+        echo "  ${ONE_SERVICE_STARTMSG}" >> /etc/motd
+        echo "" >> /etc/motd
+
+        # Also write service report
+        cat > "${ONE_SERVICE_SETUP_DIR}/config" <<REPORT_EOF
+# NemoClaw Appliance Report - $(date -Iseconds)
+READY=YES
+SANDBOX_NAME=${_sandbox_name}
+MODEL=${_model}
+GPU_DETECTED=${_gpu}
+GPU_MODEL=${NEMOCLAW_GPU_MODEL:-none}
+REPORT_EOF
+
+        msg info "============================================"
+        msg info "  NemoClaw appliance is ready!"
+        msg info "  Sandbox: ${_sandbox_name}"
+        msg info "  Model:   ${_model}"
+        msg info "  GPU:     $([ \"${_gpu}\" = \"true\" ] && echo \"${NEMOCLAW_GPU_MODEL}\" || echo \"Remote inference only\")"
+        msg info "============================================"
+
+        return 0
+    else
+        msg error "NemoClaw health check failed"
+        msg error "The sandbox may still be starting. Check with: nemoclaw ${_sandbox_name} status"
+
+        cat > /etc/motd <<MOTD_WARN
+============================================================
+  NemoClaw Appliance - HEALTH CHECK WARNING
+
+  Sandbox '${_sandbox_name}' did not pass health checks.
+  It may still be initializing.
+
+  Check status: nemoclaw ${_sandbox_name} status
+  View logs:    nemoclaw ${_sandbox_name} logs
+============================================================
+MOTD_WARN
+        return 1
+    fi
 }
 
 service_cleanup()
 {
-    :
+    msg info "Cleaning up NemoClaw configuration for recontext..."
+
+    # Remove config file so service_configure rewrites it
+    rm -f "${ONE_SERVICE_SETUP_DIR}/nemoclaw.conf"
+
+    # Remove API key file (will be re-created from new CONTEXT)
+    rm -f "${NEMOCLAW_API_KEY_FILE}"
+
+    msg info "Cleanup complete. service_configure will run with new CONTEXT values."
+
+    return 0
 }
