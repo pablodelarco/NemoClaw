@@ -18,7 +18,7 @@ One-click deployment of NemoClaw on OpenNebula with GPU passthrough and secure d
 
 ### Active
 
-- [ ] Packer build produces a bootable qcow2 image with NemoClaw pre-installed on Ubuntu 22.04
+- [ ] Packer build produces a bootable qcow2 image with NemoClaw pre-installed on Ubuntu 24.04
 - [ ] GPU passthrough configuration works with NVIDIA GPUs via OpenNebula PCI device assignment
 - [ ] Docker and NVIDIA Container Toolkit pre-installed and configured
 - [ ] NemoClaw sandbox runtime (OpenShell) starts on boot via contextualization
@@ -82,4 +82,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-24 after Phase 1 completion*
+*Last updated: 2026-03-24 after Phase 2 completion*
