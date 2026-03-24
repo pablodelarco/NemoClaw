@@ -183,7 +183,12 @@ NCTK_EOF
     # 12. Cleanup (per D-11, postinstall_cleanup pattern)
     # ---------------------------------------------------------------------- #
     msg info "Running post-install cleanup..."
-    postinstall_cleanup
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get autoremove -y 2>/dev/null || true
+    apt-get autoclean 2>/dev/null || true
+    find /var/log -type f -exec truncate -s 0 {} \; 2>/dev/null || true
+    rm -rf /var/cache/apt/archives/*.deb 2>/dev/null || true
+    sync
 }
 
 # ========================== GPU Detection ================================== #
