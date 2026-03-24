@@ -41,16 +41,16 @@ Plans:
 **Depends on**: Phase 1
 **Requirements**: BUILD-01, BUILD-02, BUILD-03, BUILD-04, BUILD-05, BUILD-06, BUILD-07, BUILD-08, MKT-04, MKT-08, MKT-10
 **Success Criteria** (what must be TRUE):
-  1. Packer HCL config defines a QEMU builder that starts from Ubuntu 22.04 base and produces a qcow2 image
-  2. The provisioner chain installs Docker CE, NVIDIA driver 550-server, NVIDIA Container Toolkit, Node.js 22 LTS, NemoClaw, and OpenNebula contextualization packages in the correct order
+  1. Packer HCL config defines a QEMU builder that starts from Ubuntu 24.04 base and produces a qcow2 image
+  2. The provisioner chain delegates to appliance.sh's service_install() which installs Docker CE, NVIDIA driver 550-server, NVIDIA Container Toolkit, Node.js 22 LTS, NemoClaw, and pre-pulls the sandbox container image
   3. NemoClaw sandbox container image is pre-pulled during build so no network download is needed at first boot
   4. Image is post-processed with virt-sysprep (clean machine IDs, SSH keys) and virt-sparsify (reduce size)
   5. metadata.yaml, gen_context, SSH/context config scripts, and Makefile.config entry are complete and follow one-apps conventions
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md -- Packer HCL config, variables, common symlink, cloud-init, SSH hardening, and context config scripts
+- [ ] 02-02-PLAN.md -- gen_context script, metadata.yaml with VM template defaults, and Makefile.config build target
 
 ### Phase 3: Image Build and Validation
 **Goal**: A tested, bootable qcow2 image exists that auto-configures NemoClaw at first boot, supports GPU passthrough, and provides SSH/VNC access
@@ -91,6 +91,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Appliance Lifecycle Script | 0/3 | Planning complete | - |
-| 2. Packer Build Pipeline | 0/0 | Not started | - |
+| 2. Packer Build Pipeline | 0/2 | Planning complete | - |
 | 3. Image Build and Validation | 0/0 | Not started | - |
 | 4. Marketplace Packaging and PR Submission | 0/0 | Not started | - |
