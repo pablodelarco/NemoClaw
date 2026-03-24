@@ -144,9 +144,11 @@ NCTK_EOF
     # 8. Install NemoClaw non-interactively (per D-01, D-03, STACK.md)
     # ---------------------------------------------------------------------- #
     msg info "Installing NemoClaw (non-interactive)..."
+    # Run official installer with --non-interactive. Onboarding will fail
+    # (no API key at build time) but the CLI and runtime get installed.
+    # Onboarding happens at first boot via service_bootstrap.
     curl -fsSL "${NEMOCLAW_INSTALL_URL}" -o /tmp/nemoclaw-install.sh
-    sed -i 's/^ *run_onboard$/ # run_onboard (skipped for appliance build)/' /tmp/nemoclaw-install.sh
-    bash /tmp/nemoclaw-install.sh
+    bash /tmp/nemoclaw-install.sh --non-interactive || msg warning "NemoClaw onboard skipped (expected during build - runs at first boot)"
     rm -f /tmp/nemoclaw-install.sh
 
     # ---------------------------------------------------------------------- #
