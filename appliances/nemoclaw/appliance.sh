@@ -173,8 +173,128 @@ DOCKER_EOF
     postinstall_cleanup
 }
 
-# ========================== Stub Functions ================================= #
-# Implemented in subsequent plans (01-02, 01-03).
+# ========================== GPU Detection ================================== #
+# GPU_DETECTED is set by detect_gpu() and used by service_configure/service_bootstrap
+
+GPU_DETECTED=false
+GPU_MODEL=""
+GPU_MEMORY=""
+
+detect_gpu()
+{
+    msg info "Detecting NVIDIA GPU presence..."
+
+    # Check for NVIDIA GPU via lspci
+    if lspci 2>/dev/null | grep -qi 'nvidia'; then
+        msg info "NVIDIA GPU found via lspci"
+
+        # Check for device nodes
+        if [ -e /dev/nvidia0 ] || [ -e /dev/nvidiactl ]; then
+            msg info "NVIDIA device nodes present"
+
+            # Validate with nvidia-smi (per GPU-02, D-10)
+            if command -v nvidia-smi &>/dev/null; then
+                if nvidia-smi &>/dev/null; then
+                    GPU_DETECTED=true
+                    GPU_MODEL=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1 || echo "Unknown")
+                    GPU_MEMORY=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader 2>/dev/null | head -1 || echo "Unknown")
+                    msg info "GPU validated: ${GPU_MODEL} (${GPU_MEMORY})"
+
+                    # Regenerate CDI spec for container GPU access (per PITFALLS.md Pitfall 1)
+                    if command -v nvidia-ctk &>/dev/null; then
+                        msg info "Regenerating NVIDIA CDI spec..."
+                        nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml 2>/dev/null || \
+                            msg warning "CDI spec generation failed; GPU may not be available in containers"
+                    fi
+                    return 0
+                else
+                    msg warning "nvidia-smi failed; GPU device may not be properly initialized"
+                fi
+            else
+                msg warning "nvidia-smi not found; cannot validate GPU"
+            fi
+        else
+            msg warning "NVIDIA GPU detected via lspci but no device nodes found"
+        fi
+    fi
+
+    # GPU not detected or not functional (per GPU-04, D-09)
+    GPU_DETECTED=false
+    msg warning "No functional NVIDIA GPU detected. NemoClaw will use remote NVIDIA Endpoints inference only."
+    msg warning "To use local GPU inference, ensure GPU passthrough is configured on the OpenNebula host."
+    return 0
+}
+
+# ========================== MOTD Helper ==================================== #
+
+write_motd()
+{
+    local _motd_file="/etc/motd"
+    local _nemoclaw_version=""
+
+    # Get NemoClaw version if available
+    if command -v nemoclaw &>/dev/null; then
+        _nemoclaw_version=$(nemoclaw --version 2>/dev/null || echo "unknown")
+    fi
+
+    cat > "${_motd_file}" <<MOTD_EOF
+============================================================
+  NemoClaw Appliance v${ONE_SERVICE_VERSION}
+  NemoClaw: ${_nemoclaw_version:-not installed}
+============================================================
+
+  Sandbox:  ${ONEAPP_NEMOCLAW_SANDBOX_NAME:-nemoclaw}
+  Model:    ${ONEAPP_NEMOCLAW_MODEL:-nemotron-3-super-120b}
+  GPU:      $(if [ "${GPU_DETECTED}" = "true" ]; then echo "YES - ${GPU_MODEL} (${GPU_MEMORY})"; else echo "NO - Remote inference only"; fi)
+
+  Quick Start:
+    nemoclaw ${ONEAPP_NEMOCLAW_SANDBOX_NAME:-nemoclaw} connect   # Enter sandbox
+    nemoclaw ${ONEAPP_NEMOCLAW_SANDBOX_NAME:-nemoclaw} status    # Check status
+
+  WARNING: NemoClaw is alpha software. APIs may change.
+============================================================
+MOTD_EOF
+
+    chmod 644 "${_motd_file}"
+}
+
+# ========================== API Key Storage ================================ #
+# per D-05, D-06, PITFALLS.md Pitfall 6
+
+NEMOCLAW_CREDENTIALS_DIR="/etc/nemoclaw"
+NEMOCLAW_API_KEY_FILE="${NEMOCLAW_CREDENTIALS_DIR}/api_key"
+
+store_api_key()
+{
+    local _api_key="${1}"
+
+    if [ -z "${_api_key}" ]; then
+        msg error "NVIDIA API key is required but not provided."
+        msg error "Set ONEAPP_NEMOCLAW_API_KEY via OpenNebula contextualization (Sunstone VM template)."
+        msg error "You can add it via recontext without redeploying (ONE_SERVICE_RECONFIGURABLE=true)."
+        return 1
+    fi
+
+    # Create secure credentials directory
+    install -d -m 0700 "${NEMOCLAW_CREDENTIALS_DIR}"
+
+    # Write API key to restricted file (per D-05, 0600 permissions)
+    echo "${_api_key}" > "${NEMOCLAW_API_KEY_FILE}"
+    chmod 0600 "${NEMOCLAW_API_KEY_FILE}"
+    chown root:root "${NEMOCLAW_API_KEY_FILE}"
+
+    msg info "NVIDIA API key stored securely at ${NEMOCLAW_API_KEY_FILE} (mode 0600)"
+
+    # Clear from environment to reduce exposure (per PITFALLS.md Pitfall 6)
+    unset ONEAPP_NEMOCLAW_API_KEY
+
+    return 0
+}
+
+# ========================== service_configure() ============================ #
+# Runs at every boot via contextualization. Reads CONTEXT variables,
+# writes config files, detects GPU presence.
+# per LIFE-02, D-07
 
 service_configure()
 {
