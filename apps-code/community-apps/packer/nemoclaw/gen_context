@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -o errexit -o pipefail
+
+# Generate context.sh for NemoClaw Packer build
+# This file is baked into a context ISO and attached as CDROM
+# during the Packer build. It provides networking and SSH access
+# so Packer can SSH in.
+
+DEF_PASSWORD="opennebula"
+DEF_HOSTNAME="nemoclaw"
+
+cat > context.sh <<CONTEXT_EOF
+# Auto-generated context for Packer build
+ETH0_METHOD="dhcp"
+ETH0_MAC="02:00:0a:00:00:01"
+NETWORK="YES"
+SET_HOSTNAME="${DEF_HOSTNAME}"
+ROOT_PASSWORD="${DEF_PASSWORD}"
+USERNAME="root"
+PASSWORD="${DEF_PASSWORD}"
+GRANT_TYPE="EC2"
+TOKEN="YES"
+START_SCRIPT="$(base64 -w 0 <<'SCRIPT_EOF'
+#!/usr/bin/env bash
+# Configure SSH for Packer access
+sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+systemctl restart sshd || systemctl restart ssh
+
+# Configure DNS
+if [ ! -f /etc/resolv.conf ] || ! grep -q 'nameserver' /etc/resolv.conf; then
+    echo "nameserver 8.8.8.8" > /etc/resolv.conf
+    echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+fi
+SCRIPT_EOF
+)"
+CONTEXT_EOF
