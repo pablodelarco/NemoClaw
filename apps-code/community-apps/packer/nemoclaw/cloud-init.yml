@@ -1,0 +1,7 @@
+#cloud-config
+ssh_pwauth: true
+chpasswd:
+  expire: false
+  list:
+    - root:opennebula
+disable_root: false
