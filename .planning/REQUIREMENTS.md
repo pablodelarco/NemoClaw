@@ -9,14 +9,14 @@ Requirements for initial marketplace PR submission. Each maps to roadmap phases.
 
 ### Build Pipeline
 
-- [ ] **BUILD-01**: Packer build produces a bootable qcow2 image from Ubuntu 22.04 base
-- [ ] **BUILD-02**: Docker Engine CE pre-installed and enabled at boot
-- [ ] **BUILD-03**: NVIDIA driver 550-server pre-installed in the image
-- [ ] **BUILD-04**: NVIDIA Container Toolkit 1.19+ pre-installed and configured as default Docker runtime
-- [ ] **BUILD-05**: Node.js 22 LTS and npm pre-installed (NemoClaw dependency)
-- [ ] **BUILD-06**: NemoClaw installed and sandbox container image pre-pulled during build
-- [ ] **BUILD-07**: OpenNebula contextualization packages (addon-context-linux) pre-installed
-- [ ] **BUILD-08**: Image post-processed with virt-sysprep and virt-sparsify for clean distribution
+- [x] **BUILD-01**: Packer build produces a bootable qcow2 image from Ubuntu 22.04 base
+- [x] **BUILD-02**: Docker Engine CE pre-installed and enabled at boot
+- [x] **BUILD-03**: NVIDIA driver 550-server pre-installed in the image
+- [x] **BUILD-04**: NVIDIA Container Toolkit 1.19+ pre-installed and configured as default Docker runtime
+- [x] **BUILD-05**: Node.js 22 LTS and npm pre-installed (NemoClaw dependency)
+- [x] **BUILD-06**: NemoClaw installed and sandbox container image pre-pulled during build
+- [x] **BUILD-07**: OpenNebula contextualization packages (addon-context-linux) pre-installed
+- [x] **BUILD-08**: Image post-processed with virt-sysprep and virt-sparsify for clean distribution
 - [ ] **BUILD-09**: Packer build runs successfully on build host (ssh root@100.123.42.13)
 
 ### Appliance Lifecycle
@@ -57,7 +57,7 @@ Requirements for initial marketplace PR submission. Each maps to roadmap phases.
 - [ ] **MKT-05**: context.yaml with test context parameter defaults
 - [ ] **MKT-06**: tests.yaml listing test files
 - [ ] **MKT-07**: RSpec tests verify Docker, NVIDIA drivers, NemoClaw container health, CLI availability, MOTD readiness
-- [ ] **MKT-08**: Packer build files (HCL config, variables, gen_context, SSH config, context config scripts)
+- [x] **MKT-08**: Packer build files (HCL config, variables, gen_context, SSH config, context config scripts)
 - [ ] **MKT-09**: NemoClaw logo file in logos/ directory
 - [ ] **MKT-10**: Makefile.config updated with nemoclaw as build target
 - [ ] **MKT-11**: PR passes /marketplace-check validation
@@ -106,14 +106,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUILD-01 | Phase 2 | Pending |
-| BUILD-02 | Phase 2 | Pending |
-| BUILD-03 | Phase 2 | Pending |
-| BUILD-04 | Phase 2 | Pending |
-| BUILD-05 | Phase 2 | Pending |
-| BUILD-06 | Phase 2 | Pending |
-| BUILD-07 | Phase 2 | Pending |
-| BUILD-08 | Phase 2 | Pending |
+| BUILD-01 | Phase 2 | Complete |
+| BUILD-02 | Phase 2 | Complete |
+| BUILD-03 | Phase 2 | Complete |
+| BUILD-04 | Phase 2 | Complete |
+| BUILD-05 | Phase 2 | Complete |
+| BUILD-06 | Phase 2 | Complete |
+| BUILD-07 | Phase 2 | Complete |
+| BUILD-08 | Phase 2 | Complete |
 | BUILD-09 | Phase 3 | Pending |
 | LIFE-01 | Phase 1 | Complete |
 | LIFE-02 | Phase 1 | Complete |
@@ -139,7 +139,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MKT-05 | Phase 4 | Pending |
 | MKT-06 | Phase 4 | Pending |
 | MKT-07 | Phase 4 | Pending |
-| MKT-08 | Phase 2 | Pending |
+| MKT-08 | Phase 2 | Complete |
 | MKT-09 | Phase 4 | Pending |
 | MKT-10 | Phase 2 | Pending |
 | MKT-11 | Phase 4 | Pending |
