@@ -10,7 +10,7 @@ variable "version" {
 
 variable "input_dir" {
   type    = string
-  default = "export"
+  default = "packer/nemoclaw"
 }
 
 variable "output_dir" {
@@ -21,11 +21,4 @@ variable "output_dir" {
 variable "headless" {
   type    = bool
   default = true
-}
-
-variable "nemoclaw" {
-  type = map(string)
-  default = {
-    one_service_version = "0.1.0"
-  }
 }

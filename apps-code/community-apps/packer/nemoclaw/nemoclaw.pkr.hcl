@@ -1,139 +1,120 @@
-# --------------------------------------------------------------------------- #
-# NemoClaw OpenNebula Marketplace Appliance - Packer Build Configuration
-# --------------------------------------------------------------------------- #
-# Builds a qcow2 image from Ubuntu 24.04 base with NemoClaw pre-installed.
-# Follows the one-apps/Prowler build pattern exactly.
-# --------------------------------------------------------------------------- #
+source "null" "null" { communicator = "none" }
 
-# =========================================================================== #
-# Build 1: Context ISO Generation
-# =========================================================================== #
-# Generates a context ISO that provides SSH credentials and network config
-# for the Packer build VM to boot and accept SSH connections.
-
+# Prior to setting up the appliance, the context packages need to be generated first
 build {
-  sources = ["source.null.context"]
+  sources = ["source.null.null"]
 
   provisioner "shell-local" {
     inline = [
-      "mkdir -p ${var.input_dir}",
-      "${path.root}/gen_context > context.sh"
-    ]
-  }
-
-  provisioner "shell-local" {
-    inline = [
-      "mkisofs -o '${var.input_dir}/context.iso' -V CONTEXT -J -R context.sh"
+      "mkdir -p ${var.input_dir}/context",
+      "${var.input_dir}/gen_context > ${var.input_dir}/context/context.sh",
+      "mkisofs -o ${var.input_dir}/${var.appliance_name}-context.iso -V CONTEXT -J -R ${var.input_dir}/context",
     ]
   }
 }
 
-# =========================================================================== #
-# Build 2: QEMU VM Build
-# =========================================================================== #
-# Boots the Ubuntu 24.04 base image, provisions NemoClaw via the appliance
-# lifecycle script, and produces a clean qcow2 image.
-
+# Build VM image using QEMU
 source "qemu" "nemoclaw" {
-  iso_url          = "${var.input_dir}/ubuntu2404.qcow2"
-  iso_checksum     = "none"
+  cpus        = 2
+  memory      = 8192
+  accelerator = "kvm"
+
+  iso_url      = "../one-apps/export/ubuntu2404.qcow2"
+  iso_checksum = "none"
+
+  headless = var.headless
+
   disk_image       = true
-  disk_size        = "20480"
-  memory           = 8192
-  cpus             = 2
-  accelerator      = "kvm"
-  headless         = var.headless
-  format           = "qcow2"
-  disk_compression = true
-  net_device       = "virtio-net"
+  disk_cache       = "unsafe"
   disk_interface   = "virtio"
+  net_device       = "virtio-net"
+  format           = "qcow2"
+  disk_compression = false
+  disk_size        = "20480"
+
+  output_directory = var.output_dir
 
   qemuargs = [
-    ["-cdrom", "${var.input_dir}/context.iso"]
+    ["-serial", "stdio"],
+    ["-cpu", "host"],
+    ["-cdrom", "${var.input_dir}/${var.appliance_name}-context.iso"],
+    # MAC addr needs to match ETH0_MAC from context iso
+    ["-netdev", "user,id=net0,hostfwd=tcp::{{ .SSHHostPort }}-:22"],
+    ["-device", "virtio-net-pci,netdev=net0,mac=00:11:22:33:44:55"]
   ]
 
   ssh_username     = "root"
   ssh_password     = "opennebula"
-  ssh_timeout      = "20m"
-  shutdown_command  = "shutdown -P now"
-  output_directory = "${var.output_dir}"
-  vm_name          = "${var.appliance_name}.qcow2"
-}
-
-source "null" "context" {
-  communicator = "none"
+  ssh_timeout      = "900s"
+  shutdown_command  = "poweroff"
+  vm_name          = "${var.appliance_name}"
 }
 
 build {
   sources = ["source.qemu.nemoclaw"]
 
-  # 1. SSH hardening
+  # Revert insecure SSH options done by context start_script
   provisioner "shell" {
-    scripts = ["${path.root}/81-configure-ssh.sh"]
+    scripts = ["${var.input_dir}/81-configure-ssh.sh"]
   }
 
-  # 2. Create one-appliance directory structure
+  # Create directory structure for appliance scripts
   provisioner "shell" {
+    inline_shebang = "/bin/bash -e"
     inline = [
-      "mkdir -p /etc/one-appliance/service.d",
-      "chmod 0750 /etc/one-appliance"
+      "install -o 0 -g 0 -m u=rwx,g=rx,o=   -d /etc/one-appliance/{,service.d/,lib/}",
+      "install -o 0 -g 0 -m u=rwx,g=rx,o=rx -d /opt/one-appliance/{,bin/}",
     ]
   }
 
-  # 3. Copy context hooks from one-apps framework
+  # Copy appliance management scripts
   provisioner "file" {
-    sources     = ["one-apps/appliances/scripts/net-90-service-appliance", "one-apps/appliances/scripts/net-99-report-ready"]
-    destination = "/etc/one-context.d/"
-  }
-
-  # 4. Copy framework libraries
-  provisioner "file" {
-    sources     = ["one-apps/appliances/lib/common.sh", "one-apps/appliances/lib/functions.sh"]
+    sources = [
+      "../one-apps/appliances/scripts/net-90-service-appliance",
+      "../one-apps/appliances/scripts/net-99-report-ready",
+    ]
     destination = "/etc/one-appliance/"
   }
 
-  # 5. Copy service manager
+  # Copy bash libraries
   provisioner "file" {
-    source      = "one-apps/appliances/scripts/service.sh"
+    sources = [
+      "../../lib/common.sh",
+      "../../lib/functions.sh",
+    ]
+    destination = "/etc/one-appliance/lib/"
+  }
+
+  # Copy appliance service manager
+  provisioner "file" {
+    source      = "../one-apps/appliances/service.sh"
     destination = "/etc/one-appliance/service"
   }
 
-  # 6. Make service executable
-  provisioner "shell" {
-    inline = ["chmod 0755 /etc/one-appliance/service"]
-  }
-
-  # 7. Copy appliance.sh
+  # Copy NemoClaw appliance script
   provisioner "file" {
-    source      = "appliances/${var.appliance_name}/appliance.sh"
-    destination = "/etc/one-appliance/service.d/appliance.sh"
+    sources     = ["../../appliances/nemoclaw/appliance.sh"]
+    destination = "/etc/one-appliance/service.d/"
   }
 
-  # 8. Make appliance.sh executable
+  # Configure context
   provisioner "shell" {
-    inline = ["chmod 0755 /etc/one-appliance/service.d/appliance.sh"]
+    scripts = ["${var.input_dir}/82-configure-context.sh"]
   }
 
-  # 9. Configure context
+  # Execute install step
   provisioner "shell" {
-    scripts = ["${path.root}/82-configure-context.sh"]
+    inline_shebang = "/bin/bash -e"
+    inline         = ["/etc/one-appliance/service install && sync"]
   }
 
-  # 10. Run service install (triggers service_install from appliance.sh)
-  provisioner "shell" {
-    inline = ["/etc/one-appliance/service install"]
-    environment_vars = [
-      "DEBIAN_FRONTEND=noninteractive"
-    ]
-  }
-
-  # Post-processor: virt-sysprep + virt-sparsify for clean distribution
+  # Post-process: clean up machine ID, etc.
   post-processor "shell-local" {
     execute_command = ["bash", "-c", "{{.Vars}} {{.Script}}"]
     environment_vars = [
       "OUTPUT_DIR=${var.output_dir}",
-      "APPLIANCE_NAME=${var.appliance_name}"
+      "APPLIANCE_NAME=${var.appliance_name}",
     ]
-    scripts = ["one-apps/packer/postprocess.sh"]
+    scripts = ["../one-apps/packer/postprocess.sh"]
   }
 }
