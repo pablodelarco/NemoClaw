@@ -1,37 +1,45 @@
-#!/usr/bin/env bash
-set -o errexit -o pipefail
+#!/bin/bash
+set -eux -o pipefail
 
-# Generate context.sh for NemoClaw Packer build
-# This file is baked into a context ISO and attached as CDROM
-# during the Packer build. It provides networking and SSH access
-# so Packer can SSH in.
+SCRIPT=$(cat <<'MAINEND'
+# Try with gawk first, fallback if not available
+if command -v gawk &> /dev/null; then
+    gawk -i inplace -f- /etc/ssh/sshd_config <<'SSHEOF'
+BEGIN { update = "PasswordAuthentication yes" }
+/^[#\s]*PasswordAuthentication\s/ { $0 = update; found = 1 }
+{ print }
+ENDFILE { if (!found) print update }
+SSHEOF
 
-DEF_PASSWORD="opennebula"
-DEF_HOSTNAME="nemoclaw"
-
-cat > context.sh <<CONTEXT_EOF
-# Auto-generated context for Packer build
-ETH0_METHOD="dhcp"
-ETH0_MAC="02:00:0a:00:00:01"
-NETWORK="YES"
-SET_HOSTNAME="${DEF_HOSTNAME}"
-ROOT_PASSWORD="${DEF_PASSWORD}"
-USERNAME="root"
-PASSWORD="${DEF_PASSWORD}"
-GRANT_TYPE="EC2"
-TOKEN="YES"
-START_SCRIPT="$(base64 -w 0 <<'SCRIPT_EOF'
-#!/usr/bin/env bash
-# Configure SSH for Packer access
-sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-systemctl restart sshd || systemctl restart ssh
-
-# Configure DNS
-if [ ! -f /etc/resolv.conf ] || ! grep -q 'nameserver' /etc/resolv.conf; then
-    echo "nameserver 8.8.8.8" > /etc/resolv.conf
-    echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+    gawk -i inplace -f- /etc/ssh/sshd_config <<'SSHEOF'
+BEGIN { update = "PermitRootLogin yes" }
+/^[#\s]*PermitRootLogin\s/ { $0 = update; found = 1 }
+{ print }
+ENDFILE { if (!found) print update }
+SSHEOF
+else
+    # Fallback: remove cloudimg settings that disable password auth
+    rm -rf /etc/ssh/sshd_config.d/*-cloudimg-settings.conf 2>/dev/null || true
+    # Ensure PermitRootLogin and PasswordAuthentication are enabled
+    sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+    sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+    # Add if not present
+    grep -q "^PermitRootLogin" /etc/ssh/sshd_config || echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+    grep -q "^PasswordAuthentication" /etc/ssh/sshd_config || echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 fi
-SCRIPT_EOF
-)"
-CONTEXT_EOF
+
+systemctl reload sshd || systemctl reload ssh || true
+
+echo "nameserver 1.1.1.1" > /etc/resolv.conf
+MAINEND
+)
+
+cat<<CTXEOF
+ETH0_METHOD='dhcp'
+NETWORK='YES'
+SET_HOSTNAME='nemoclaw'
+PASSWORD='opennebula'
+ETH0_MAC='00:11:22:33:44:55'
+NETCFG_TYPE='nm'
+START_SCRIPT_BASE64="$(echo "$SCRIPT" | base64 -w0)"
+CTXEOF
