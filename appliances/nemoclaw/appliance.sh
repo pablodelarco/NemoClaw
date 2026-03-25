@@ -41,8 +41,16 @@ ONE_SERVICE_PARAMS=()
 
 service_install()
 {
+    # 0. Wait for any existing apt/dpkg locks (unattended-upgrades, cloud-init)
+    msg info "Waiting for dpkg lock..."
+    while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 5; done
+    while fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do sleep 5; done
+    systemctl stop unattended-upgrades 2>/dev/null || true
+    systemctl disable unattended-upgrades 2>/dev/null || true
+
     # 1. Prerequisites
     msg info "Installing prerequisite packages..."
+    export DEBIAN_FRONTEND=noninteractive
     apt-get update
     apt-get install -y \
         apt-transport-https \
