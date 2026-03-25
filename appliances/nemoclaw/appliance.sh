@@ -139,7 +139,39 @@ NCTK_EOF
     mkswap /swapfile
     echo '/swapfile none swap sw 0 0' >> /etc/fstab
 
-    # 9. Cleanup
+    # 9. Login welcome banner (survives one-apps MOTD override)
+    msg info "Creating login welcome banner..."
+    cat > /etc/profile.d/99-nemoclaw-welcome.sh <<'WELCOME_EOF'
+#!/bin/bash
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+echo "=================================================="
+echo "  NemoClaw Appliance"
+echo "  NVIDIA AI Agent Security Stack"
+echo "=================================================="
+echo ""
+if command -v nemoclaw &>/dev/null; then
+    echo "  NemoClaw: $(nemoclaw --version 2>/dev/null || echo 'installed')"
+else
+    echo "  NemoClaw: not found"
+fi
+echo ""
+echo "  Get started:"
+echo "    1. Get your API key at https://build.nvidia.com"
+echo "    2. Run: nemoclaw onboard"
+echo "    3. Follow the interactive setup wizard"
+echo "    4. Connect: nemoclaw <sandbox-name> connect"
+echo ""
+echo "  Docs: https://docs.nvidia.com/nemoclaw/latest/"
+echo ""
+echo "  Default root password: opennebula"
+echo "=================================================="
+WELCOME_EOF
+    chmod +x /etc/profile.d/99-nemoclaw-welcome.sh
+
+    # 10. Cleanup
     msg info "Running post-install cleanup..."
     export DEBIAN_FRONTEND=noninteractive
     apt-get autoremove -y 2>/dev/null || true
