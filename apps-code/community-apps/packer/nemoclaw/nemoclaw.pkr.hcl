@@ -30,7 +30,7 @@ source "qemu" "nemoclaw" {
   net_device       = "virtio-net"
   format           = "qcow2"
   disk_compression = false
-  disk_size        = "20480"
+  disk_size        = "40960"
 
   output_directory = var.output_dir
 
