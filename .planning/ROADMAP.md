@@ -77,11 +77,11 @@ Plans:
   2. README.md documents quick start, architecture overview, configuration parameters, and GPU host requirements
   3. RSpec tests verify Docker running, NVIDIA drivers loaded, NemoClaw container healthy, CLI available, and MOTD showing readiness
   4. PR to OpenNebula/marketplace-community passes /marketplace-check validation bot
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md -- Documentation (README, CHANGELOG), test infrastructure (context.yaml, tests.yaml, RSpec tests), and logo
+- [ ] 04-02-PLAN.md -- UUID YAML metadata with image checksums and PR submission to marketplace-community
 
 ## Progress
 
@@ -93,4 +93,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Appliance Lifecycle Script | 0/3 | Planning complete | - |
 | 2. Packer Build Pipeline | 0/2 | Planning complete | - |
 | 3. Image Build and Validation | 0/2 | Planning complete | - |
-| 4. Marketplace Packaging and PR Submission | 0/0 | Not started | - |
+| 4. Marketplace Packaging and PR Submission | 0/2 | Planning complete | - |
