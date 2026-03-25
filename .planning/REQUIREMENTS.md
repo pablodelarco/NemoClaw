@@ -51,14 +51,14 @@ Requirements for initial marketplace PR submission. Each maps to roadmap phases.
 ### Marketplace Submission
 
 - [ ] **MKT-01**: UUID-named YAML metadata file with all required fields (name, version, publisher, description, tags, format, OS, checksums, user_inputs)
-- [ ] **MKT-02**: README.md with quick start guide, architecture overview, configuration parameters table, GPU requirements
-- [ ] **MKT-03**: CHANGELOG.md with initial version entry
+- [x] **MKT-02**: README.md with quick start guide, architecture overview, configuration parameters table, GPU requirements
+- [x] **MKT-03**: CHANGELOG.md with initial version entry
 - [x] **MKT-04**: metadata.yaml with build/test infrastructure config (OS base, context params, VM template)
-- [ ] **MKT-05**: context.yaml with test context parameter defaults
-- [ ] **MKT-06**: tests.yaml listing test files
-- [ ] **MKT-07**: RSpec tests verify Docker, NVIDIA drivers, NemoClaw container health, CLI availability, MOTD readiness
+- [x] **MKT-05**: context.yaml with test context parameter defaults
+- [x] **MKT-06**: tests.yaml listing test files
+- [x] **MKT-07**: RSpec tests verify Docker, NVIDIA drivers, NemoClaw container health, CLI availability, MOTD readiness
 - [x] **MKT-08**: Packer build files (HCL config, variables, gen_context, SSH config, context config scripts)
-- [ ] **MKT-09**: NemoClaw logo file in logos/ directory
+- [x] **MKT-09**: NemoClaw logo file in logos/ directory
 - [x] **MKT-10**: Makefile.config updated with nemoclaw as build target
 - [ ] **MKT-11**: PR passes /marketplace-check validation
 
@@ -133,14 +133,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HLTH-02 | Phase 3 | Pending |
 | HLTH-03 | Phase 3 | Pending |
 | MKT-01 | Phase 4 | Pending |
-| MKT-02 | Phase 4 | Pending |
-| MKT-03 | Phase 4 | Pending |
+| MKT-02 | Phase 4 | Complete |
+| MKT-03 | Phase 4 | Complete |
 | MKT-04 | Phase 2 | Complete |
-| MKT-05 | Phase 4 | Pending |
-| MKT-06 | Phase 4 | Pending |
-| MKT-07 | Phase 4 | Pending |
+| MKT-05 | Phase 4 | Complete |
+| MKT-06 | Phase 4 | Complete |
+| MKT-07 | Phase 4 | Complete |
 | MKT-08 | Phase 2 | Complete |
-| MKT-09 | Phase 4 | Pending |
+| MKT-09 | Phase 4 | Complete |
 | MKT-10 | Phase 2 | Complete |
 | MKT-11 | Phase 4 | Pending |
 | ACC-01 | Phase 3 | Pending |
