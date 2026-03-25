@@ -6,7 +6,13 @@ set -o errexit -o pipefail
 
 # Disable password authentication (key-only after deployment)
 sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin without-password/' /etc/ssh/sshd_config
+sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# Remove cloudimg SSH overrides that can block password auth
+rm -f /etc/ssh/sshd_config.d/*-cloudimg-settings.conf 2>/dev/null || true
+
+# Remove stale netplan NM configs that conflict with one-context
+rm -f /etc/netplan/90-NM-*.yaml 2>/dev/null || true
 
 # Enable public key authentication
 sed -i 's/^#\?PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
