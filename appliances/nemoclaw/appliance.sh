@@ -156,6 +156,14 @@ service_configure()
 {
     msg info "Configuring NemoClaw appliance..."
 
+    # Set default root password if not already set (virt-sysprep clears it)
+    local _shadow
+    _shadow=$(getent shadow root | cut -d: -f2)
+    if [ "$_shadow" = "*" ] || [ "$_shadow" = "!" ] || [ -z "$_shadow" ]; then
+        msg info "Setting default root password (opennebula)..."
+        echo 'root:opennebula' | chpasswd
+    fi
+
     # Ensure Docker is running
     if ! systemctl is-active --quiet docker; then
         msg info "Starting Docker daemon..."
