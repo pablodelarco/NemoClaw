@@ -38,7 +38,7 @@ NemoClaw works without a GPU using cloud inference via NVIDIA Endpoints. For loc
 2. Assign an NVIDIA GPU to the VM via Sunstone (PCI vendor `10de`)
 3. The appliance auto-detects the GPU and configures the container runtime
 
-See the [OpenNebula GPU Passthrough docs](https://docs.opennebula.io/7.0/open_cluster_deployment/networking_setup/pci_passthrough.html) for details.
+See the [OpenNebula GPU Passthrough docs](https://docs.opennebula.io/7.0/product/cluster_configuration/hosts_and_clusters/nvidia_gpu_passthrough/) for details.
 
 ## System Requirements
 
