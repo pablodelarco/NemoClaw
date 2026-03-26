@@ -21,7 +21,7 @@ Deploys a ready-to-use VM image with NemoClaw CLI, Docker, NVIDIA GPU drivers, a
 
 ## Quick Start
 
-1. Deploy the appliance from the [OpenNebula Marketplace](https://marketplace.opennebula.io)
+1. Deploy the appliance from the [OpenNebula Community Marketplace](https://community-marketplace.opennebula.io/)
 2. SSH in: `ssh root@<VM_IP>` (password: `opennebula`)
 3. Get an API key at [build.nvidia.com](https://build.nvidia.com)
 4. Run: `nemoclaw onboard`
