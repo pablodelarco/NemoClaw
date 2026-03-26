@@ -2,11 +2,22 @@
 
 OpenNebula Community Marketplace appliance for [NVIDIA NemoClaw](https://www.nvidia.com/en-us/ai/nemoclaw/), the open-source AI agent security stack built on OpenClaw.
 
-Deploys a ready-to-use VM image with NemoClaw CLI, Docker, NVIDIA GPU drivers, and Container Toolkit pre-installed. Users SSH in, run `nemoclaw onboard`, and get sandboxed AI agent execution with deny-by-default network policies.
+Deploys a ready-to-use VM with NemoClaw, Docker, NVIDIA GPU drivers, and Container Toolkit pre-installed. SSH in, run `nemoclaw onboard`, and get sandboxed AI agent execution with deny-by-default network policies.
 
-## Marketplace PR
+## Download
 
-**PR**: [OpenNebula/marketplace-community#118](https://github.com/OpenNebula/marketplace-community/pull/118)
+Available at the [OpenNebula Community Marketplace](https://community-marketplace.opennebula.io/).
+
+## Quick Start
+
+1. Import the appliance from the Community Marketplace in OpenNebula Sunstone
+2. Create a VM template from the imported image
+3. Instantiate the VM (minimum 8 GiB RAM, 2 vCPU, 40 GiB disk)
+4. SSH in: `ssh root@<VM_IP>` (password: `opennebula`)
+5. Get an API key at [build.nvidia.com](https://build.nvidia.com)
+6. Run: `nemoclaw onboard`
+7. Follow the interactive setup wizard
+8. Connect to your sandbox: `nemoclaw <sandbox-name> connect`
 
 ## What's Included
 
@@ -19,52 +30,33 @@ Deploys a ready-to-use VM image with NemoClaw CLI, Docker, NVIDIA GPU drivers, a
 | Node.js | 22.x LTS |
 | NemoClaw CLI | 0.1.0 (alpha) |
 
-## Quick Start
+## GPU Passthrough (Optional)
 
-1. Deploy the appliance from the [OpenNebula Community Marketplace](https://community-marketplace.opennebula.io/)
-2. SSH in: `ssh root@<VM_IP>` (password: `opennebula`)
-3. Get an API key at [build.nvidia.com](https://build.nvidia.com)
-4. Run: `nemoclaw onboard`
-5. Connect: `nemoclaw <sandbox-name> connect`
+NemoClaw works without a GPU using cloud inference via NVIDIA Endpoints. For local GPU inference, configure PCI device assignment on the OpenNebula host:
 
-## Building the Image
+1. Enable IOMMU in BIOS and kernel (`intel_iommu=on` or `amd_iommu=on`)
+2. Assign an NVIDIA GPU to the VM via Sunstone (PCI vendor `10de`)
+3. The appliance auto-detects the GPU and configures the container runtime
 
-Requires a KVM-capable host with Packer 1.10+, QEMU, and guestfs-tools.
+See the [OpenNebula GPU Passthrough docs](https://docs.opennebula.io/stable/open_cluster_deployment/networking_setup/pci_passthrough.html) for details.
 
-```bash
-# Clone marketplace-community with one-apps submodule
-git clone --recurse-submodules https://github.com/OpenNebula/marketplace-community.git
-cd marketplace-community/apps-code/community-apps
+## System Requirements
 
-# Copy appliance and Packer files from this repo
-cp -r /path/to/NemoClaw/appliances/nemoclaw ../../appliances/
-cp -r /path/to/NemoClaw/apps-code/community-apps/packer/nemoclaw packer/
+| Resource | Minimum | Recommended |
+|----------|---------|-------------|
+| CPU | 2 vCPU | 4+ vCPU |
+| RAM | 8 GiB | 16 GiB |
+| Disk | 40 GiB | 40 GiB |
+| GPU | Optional | NVIDIA GPU with passthrough |
 
-# Build
-packer build packer/nemoclaw/
-```
+## Documentation
 
-Output: `output/nemoclaw` (qcow2, ~7 GiB compressed, 40 GiB virtual)
-
-## Repository Structure
-
-```
-appliances/nemoclaw/
-  appliance.sh              # Service lifecycle script
-  *.yaml                    # Marketplace metadata, build config, test config
-  tests/                    # RSpec certification tests
-  README.md                 # Appliance documentation
-
-apps-code/community-apps/
-  packer/nemoclaw/          # Packer build pipeline
-  Makefile.config           # Build system registration
-
-logos/
-  nemoclaw.png              # Appliance logo
-```
+- [NVIDIA NemoClaw Developer Guide](https://docs.nvidia.com/nemoclaw/latest/)
+- [NemoClaw GitHub](https://github.com/NVIDIA/NemoClaw)
+- [OpenNebula Community Marketplace](https://community-marketplace.opennebula.io/)
 
 ## License
 
 Appliance packaging: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-NemoClaw itself is licensed under [Apache 2.0](https://github.com/NVIDIA/NemoClaw/blob/main/LICENSE) by NVIDIA.
+NemoClaw is licensed under [Apache 2.0](https://github.com/NVIDIA/NemoClaw/blob/main/LICENSE) by NVIDIA.
